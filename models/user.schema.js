@@ -5,6 +5,10 @@ const bcrypt = require('bcryptjs');
 const { reset } = require('nodemon');
 
 const userSchema = new mongoose.Schema({
+    cart: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Cart',
+    },
     name: {
         type: String,
         required: [true, 'A user must have a name'],
