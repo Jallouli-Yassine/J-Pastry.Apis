@@ -9,7 +9,7 @@ const hpp = require('hpp');
 const path = require("path");
 const AppError = require('./middleware/errorHandler');
 const globalErrorHandler = require('./controller/errorController');
-const rootIndex = require("./routes/index");
+
 
 const app = express();
 
@@ -48,7 +48,12 @@ app.get('/', (req, res) => {
 });
 
 // API routes
+
+const rootIndex = require("./routes/index");
+const rootCategory = require("./routes/categoryRoutes");
+
 app.use("/api", rootIndex);
+app.use("/api/category", rootCategory);
 
 // Handle undefined routes
 app.all('*', (req, res, next) => {
