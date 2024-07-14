@@ -51,9 +51,11 @@ app.get('/', (req, res) => {
 
 const rootIndex = require("./routes/index");
 const rootCategory = require("./routes/categoryRoutes");
+const rootProduct = require("./routes/productRoutes");
 
 app.use("/api", rootIndex);
 app.use("/api/category", rootCategory);
+app.use("/api/product", rootProduct);
 
 // Handle undefined routes
 app.all('*', (req, res, next) => {
