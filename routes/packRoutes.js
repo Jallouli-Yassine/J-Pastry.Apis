@@ -7,7 +7,7 @@ router
     .get(packController.getAllPacks)
     .post(packController.addPack)
 
-router.post('/addProduct/:idPack/:idProduct', packController.addNewProductToPack);
+router.post('/addProduct/:idPack/:idProduct/:quantity', packController.addNewProductToPack);
 router.post('/removeProduct/:idPack/:idProduct', packController.removeProductFromPack);
 
 router

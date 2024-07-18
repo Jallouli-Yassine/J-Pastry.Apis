@@ -5,7 +5,7 @@ let e = new AppError('_', 0);
 // Add product route handler
 exports.addProduct = async (req, res, next) => {
     try {
-        const { name, description, price, stock, imageUrl } = req.body;
+        const { name, description, pricePerUnit, unit,stock, imageUrl } = req.body;
         const category=req.params.idCateg;
         //console.log(category)
         // Validate if category exists
@@ -19,7 +19,8 @@ exports.addProduct = async (req, res, next) => {
         const savedProduct = await Product.create({
             name:name,
             description:description,
-            price:price,
+            pricePerUnit:pricePerUnit,
+            unit:unit,
             category:categoryExists,
             stock:stock,
             imageUrl:imageUrl

@@ -6,13 +6,17 @@ let e = new AppError('_', 0);
 
 const getTotalPrice = async (idPack) => {
     try {
-        const pack = await Pack.findById(idPack).populate('products');
+        const pack = await Pack.findById(idPack).populate('products.product');
 
         if (!pack) {
             throw new Error('No pack found with that ID');
         }
 
-        const initTotalPrice = pack.products.reduce((acc, product) => acc + product.price, 0);
+        // Calculate the initial total price based on pricePerUnit and quantity
+        const initTotalPrice = pack.products.reduce((acc, p) => {
+            return acc + (p.product.pricePerUnit * p.quantity);
+        }, 0);
+
         const afterDiscount = initTotalPrice * (1 - (pack.discount || 0) / 100);
 
         console.log(initTotalPrice, afterDiscount);
@@ -39,7 +43,6 @@ const updatePrice = async (pack) => {
     }
 };
 
-
 exports.addPack = async (req, res, next) => {
     try {
         const { name, description } = req.body;
@@ -63,7 +66,7 @@ exports.addPack = async (req, res, next) => {
 
 exports.addNewProductToPack = async (req, res, next) => {
     try {
-        const { idProduct, idPack } = req.params;
+        const { idProduct, idPack,quantity } = req.params;
 
 
         const pack = await Pack.findById(idPack);
@@ -75,12 +78,13 @@ exports.addNewProductToPack = async (req, res, next) => {
         if (!product) {
             return next(new AppError('No product found with that id', 404));
         }
-        if(pack.products.includes(idProduct)) {
-            return next(new AppError('Product already in pack', 404));
+        const productIndex = pack.products.findIndex(p => p.product.equals(idProduct));
+        if (productIndex > -1) {
+            return next(new AppError('Product already in pack', 400));
         }
 
 
-        pack.products.push(idProduct);
+        pack.products.push({ product: idProduct, quantity: quantity });
         await pack.save();
 
         await updatePrice(pack);
@@ -112,11 +116,12 @@ exports.removeProductFromPack = async (req, res, next) => {
         if (!product) {
             return next(new AppError('No product found with that id', 404));
         }
-        if(!pack.products.includes(idProduct)) {
-            return next(new AppError('Product didnt exist in this pack', 404));
+        const productIndex = pack.products.findIndex(p => p.product.equals(idProduct));
+        if (productIndex === -1) {
+            return next(new AppError('Product didn\'t exist in this pack', 404));
         }
 
-        pack.products.pull(idProduct);
+        pack.products.splice(productIndex, 1);
         await pack.save();
 
 
