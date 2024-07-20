@@ -1,6 +1,8 @@
 const Product = require('./../models/product.schema')
 const Category = require('./../models/Pcategorie.schema')
 const AppError = require('./../middleware/errorHandler');
+const {updateAllCarts} = require('../controller/utilityController'); // Adjust the path as necessary
+
 let e = new AppError('_', 0);
 // Add product route handler
 exports.addProduct = async (req, res, next) => {
@@ -80,18 +82,27 @@ exports.deletedProduct = async (req, res, next) => {
 
 exports.updateProduct = async (req, res, next) => {
     try {
-
-        const productUpdated = await Product.findByIdAndUpdate(req.params.id, req.body, {
+        const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
             new: true,
             runValidators: true,
         });
-        if (!productUpdated) return next(new AppError('no product found with that id', 404));
 
-        res.status(200).send(productUpdated);
+        if (!product) {
+            return next(new AppError('No product found with that ID', 404));
+        }
 
+        // Update all carts after product update
+        await updateAllCarts();
+
+        res.status(200).json({
+            status: 'success',
+            data: {
+                product,
+            },
+        });
     } catch (err) {
-        res.status(500).send(err);
+        console.error('Error updating product:', err);
+        const e = new AppError('Error updating product', 500);
+        return next(e);
     }
-
-
 };

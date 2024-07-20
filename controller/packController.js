@@ -1,6 +1,8 @@
 const Product = require('./../models/product.schema')
 const Pack = require('./../models/pack.schema')
 const AppError = require('./../middleware/errorHandler');
+const {updateAllCarts} = require('../controller/utilityController'); // Adjust the path as necessary
+
 let e = new AppError('_', 0);
 // Add product route handler
 
@@ -129,6 +131,7 @@ exports.removeProductFromPack = async (req, res, next) => {
         await updatePrice(pack);
 
 
+
         res.status(201).json({
             status: 'success',
             data: {
@@ -194,6 +197,9 @@ exports.updateDiscountForPack = async (req, res, next) => {
         }
 
         await updatePrice(packUpdated);
+
+        // Update all carts after product update
+        await updateAllCarts();
 
         res.status(200).json({
             status: 'success',

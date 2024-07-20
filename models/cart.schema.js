@@ -5,7 +5,6 @@ const CartSchema = new mongoose.Schema({
     products: [{
         product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
         quantity: { type: Number, required: true, min: 1 },
-        unit: { type: String, required: true } // Unit of the product
     }],
     packs: [{
         pack: { type: mongoose.Schema.Types.ObjectId, ref: 'Pack' },
@@ -15,10 +14,8 @@ const CartSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model('Cart', CartSchema);
-
-// Function to calculate total price
-const calculateTotalPrice = async (cart) => {
+// Static method to calculate total price
+CartSchema.statics.calculateTotalPrice = async function(cart) {
     let totalPrice = 0;
 
     // Calculate the total price for products
@@ -29,10 +26,12 @@ const calculateTotalPrice = async (cart) => {
 
     // Calculate the total price for packs
     for (const item of cart.packs) {
-        const pack = await mongoose.model('Pack').findById(item.pack).populate('products');
-        const packTotalPrice = pack.products.reduce((acc, prod) => acc + prod.pricePerUnit, 0);
+        const pack = await mongoose.model('Pack').findById(item.pack).populate('products.product');
+        const packTotalPrice = pack.products.reduce((acc, prod) => acc + (prod.product.pricePerUnit * prod.quantity), 0);
         totalPrice += packTotalPrice * item.quantity;
     }
 
     return totalPrice;
 };
+
+module.exports = mongoose.model('Cart', CartSchema);

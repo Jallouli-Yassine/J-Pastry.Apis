@@ -53,11 +53,13 @@ const rootIndex = require("./routes/index");
 const rootCategory = require("./routes/categoryRoutes");
 const rootProduct = require("./routes/productRoutes");
 const rootPack = require("./routes/packRoutes");
+const rootCart = require("./routes/cartRoutes");
 
 app.use("/api", rootIndex);
 app.use("/api/category", rootCategory);
 app.use("/api/product", rootProduct);
 app.use("/api/pack", rootPack);
+app.use("/api/cart", rootCart);
 
 // Handle undefined routes
 app.all('*', (req, res, next) => {

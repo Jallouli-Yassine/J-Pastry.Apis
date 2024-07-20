@@ -4,11 +4,14 @@ const Product = require("../models/product.schema");
 const Pack = require("../models/pack.schema");
 
 
+
+
 exports.addItemToCart = async (req, res, next) => {
     try {
         const { userId, itemId, itemType } = req.params;
         let item;
 
+        // Find the item based on the itemType
         if (itemType === 'product') {
             item = await Product.findById(itemId);
         } else if (itemType === 'pack') {
@@ -20,30 +23,32 @@ exports.addItemToCart = async (req, res, next) => {
         if (!item) {
             return next(new AppError('No item found with that ID', 404));
         }
-        //andi ya pack ya product bch nhotouh fl cart
-        let cart = await Cart.findOne({ user: userId });
 
+        // Find or create a cart for the user
+        let cart = await Cart.findOne({ user: userId });
         if (!cart) {
             cart = await Cart.create({ user: userId, products: [], packs: [], totalPrice: 0 });
         }
 
+        // Add item to cart
         if (itemType === 'product') {
             const productIndex = cart.products.findIndex(p => p.product.toString() === itemId);
             if (productIndex > -1) {
-                cart.products[productIndex].quantity += quantity;
+                cart.products[productIndex].quantity += 1;
             } else {
-                cart.products.push({ product: itemId, quantity });
+                cart.products.push({ product: itemId, quantity: 1 });
             }
-        } else {
+        } else if (itemType === 'pack') {
             const packIndex = cart.packs.findIndex(p => p.pack.toString() === itemId);
             if (packIndex > -1) {
-                cart.packs[packIndex].quantity += quantity;
+                cart.packs[packIndex].quantity += 1;
             } else {
-                cart.packs.push({ pack: itemId, quantity });
+                cart.packs.push({ pack: itemId, quantity: 1 });
             }
         }
 
-        cart.totalPrice = calculateTotalPrice(cart);
+        // Recalculate the total price
+        cart.totalPrice = await Cart.calculateTotalPrice(cart);
         await cart.save();
 
         res.status(200).json({
