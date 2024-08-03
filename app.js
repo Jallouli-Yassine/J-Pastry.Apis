@@ -54,12 +54,14 @@ const rootCategory = require("./routes/categoryRoutes");
 const rootProduct = require("./routes/productRoutes");
 const rootPack = require("./routes/packRoutes");
 const rootCart = require("./routes/cartRoutes");
+const rootOrder = require("./routes/orderRoutes");
 
 app.use("/api", rootIndex);
 app.use("/api/category", rootCategory);
 app.use("/api/product", rootProduct);
 app.use("/api/pack", rootPack);
 app.use("/api/cart", rootCart);
+app.use("/api/order", rootOrder);
 
 // Handle undefined routes
 app.all('*', (req, res, next) => {

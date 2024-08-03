@@ -13,7 +13,7 @@ const OrderSchema = new mongoose.Schema({
     totalPrice: { type: Number, required: true },
     orderStatus: {
         type: String,
-        enum: ['pending', 'paid', 'shipped', 'delivered', 'cancelled'],
+        enum: ['pending', 'confirmed', 'cancelled', 'delivered'],
         default: 'pending'
     },
     createdAt: { type: Date, default: Date.now },
@@ -21,3 +21,4 @@ const OrderSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('Order', OrderSchema);
+
