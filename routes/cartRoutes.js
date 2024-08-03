@@ -5,6 +5,7 @@ const cartController = require("../controller/cartController");
 
 
 router.post('/addToCart/:userId/:itemId/:itemType', cartController.addItemToCart);
+router.get('/getUserCart/:userId', cartController.getUserCart);
 
 
 

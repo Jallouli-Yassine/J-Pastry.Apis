@@ -63,3 +63,39 @@ exports.addItemToCart = async (req, res, next) => {
         return next(e);
     }
 };
+
+
+exports.getUserCart = async (req, res, next) => {
+    try {
+        const { userId } = req.params;
+
+        // Find the cart for the user and populate products and packs
+        const cart = await Cart.findOne({ user: userId })
+            .populate({
+                path: 'products.product',
+            })
+            .populate({
+                path: 'packs.pack',
+                model: 'Pack',
+                populate: {
+                    path: 'products.product',
+                    model: 'Product'
+                }
+            });
+
+        if (!cart) {
+            return next(new AppError('No cart found for that user', 404));
+        }
+
+        res.status(200).json({
+            status: 'success',
+            data: {
+                cart
+            }
+        });
+    } catch (err) {
+        console.error('Error fetching user cart:', err);
+        const e = new AppError('Error fetching user cart', 500);
+        return next(e);
+    }
+};

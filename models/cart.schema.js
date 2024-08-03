@@ -27,8 +27,7 @@ CartSchema.statics.calculateTotalPrice = async function(cart) {
     // Calculate the total price for packs
     for (const item of cart.packs) {
         const pack = await mongoose.model('Pack').findById(item.pack).populate('products.product');
-        const packTotalPrice = pack.products.reduce((acc, prod) => acc + (prod.product.pricePerUnit * prod.quantity), 0);
-        totalPrice += packTotalPrice * item.quantity;
+        totalPrice+=pack.price;
     }
 
     return totalPrice;
