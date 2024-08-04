@@ -25,12 +25,15 @@ exports.getChatByOrderId = async (req, res, next) => {
 
 exports.sendMessage = async (req, res, next) => {
     try {
-        const { chatId } = req.params;
-        const { senderId, content } = req.body;
+        const { chatId,senderId } = req.params;
+        const { content } = req.body;
 
         const chat = await Chat.findById(chatId);
         if (!chat) {
             return next(new AppError('No chat found with that ID', 404));
+        }
+        if (chat.users.indexOf(senderId) === -1) {
+            return next(new AppError('You are not allowed to send a message to this chat', 403));
         }
 
         chat.messages.push({ sender: senderId, content });

@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'A user must have a password'],
         minlength: 8,
-        //select: false,
+        select: false,
     },
     passwordConfirm: {
         type: String,
