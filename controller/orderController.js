@@ -1,6 +1,43 @@
 const AppError = require("../middleware/errorHandler");
 const Cart = require("../models/cart.schema");
 const Order = require("../models/order.schema");
+const User = require("../models/user.schema");
+const Chat = require("../models/chat.schema");
+
+const findAvailableAgent = async () => {
+    try {
+        // Aggregate to find the agent with the fewest active chats
+        const agents = await User.aggregate([
+            { $match: { role: 'agent' } },
+            {
+                $lookup: {
+                    from: 'chats',
+                    localField: '_id',
+                    foreignField: 'users',
+                    as: 'activeChats'
+                }
+            },
+            {
+                $addFields: {
+                    activeChatsCount: { $size: '$activeChats' }
+                }
+            },
+            { $sort: { activeChatsCount: 1 } }, // Sort by the number of active chats
+            { $limit: 1 } // Get the agent with the fewest active chats
+        ]);
+
+        if (agents.length === 0) {
+            throw new Error('No agent available');
+        }
+
+        // Fetch the agent document again, but exclude the password fields
+        return await User.findById(agents[0]._id).select('-password -passwordConfirm');
+    } catch (err) {
+        console.error('Error finding available agent:', err);
+        throw err;
+    }
+};
+
 
 
 exports.placeOrder = async (req, res, next) => {
@@ -9,7 +46,6 @@ exports.placeOrder = async (req, res, next) => {
 
         // Find the user's cart
         const cart = await Cart.findOne({ user: userId }).populate('products.product packs.pack');
-        console.log(cart);
         if (!cart || (cart.products.length === 0 && cart.packs.length === 0)) {
             return next(new AppError('No items in cart to place an order', 400));
         }
@@ -27,6 +63,24 @@ exports.placeOrder = async (req, res, next) => {
         cart.packs = [];
         cart.totalPrice = 0;
         await cart.save();
+
+        // Find an available agent
+        const agent = await findAvailableAgent();
+
+        if (!agent) {
+            return next(new AppError('No agent available to handle the chat', 500));
+        }
+
+        // Create a chat for the order
+        const chat = await Chat.create({
+            users: [userId, agent._id],
+            order: order._id,
+            messages: []
+        });
+
+        // Update agent's active chats
+        agent.activeChats.push(chat._id);
+        await agent.save();
 
         res.status(201).json({
             status: 'success',

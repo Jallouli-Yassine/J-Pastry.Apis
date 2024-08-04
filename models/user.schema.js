@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Cart',
     },
+    activeChats: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Chat' }],
     name: {
         type: String,
         required: [true, 'A user must have a name'],
@@ -32,7 +33,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'A user must have a password'],
         minlength: 8,
-        select: false,
+        //select: false,
     },
     passwordConfirm: {
         type: String,
@@ -49,8 +50,8 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'A user must have a role'],
         enum: {
-            values: ['user', 'admin'],
-            message: 'Role is either user, guide, lead-guide or admin',
+            values: ['user','agent','admin'],
+            message: 'Role is either user, agent or admin',
         },
     },
     etat: {
@@ -73,10 +74,11 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.pre('save', async function (next) {
+    // Hash password if it has been modified or is new
     if (!this.isModified('password')) return next();
 
     this.password = await bcrypt.hash(this.password, 12);
-    this.passwordConfirm = undefined;
+    this.passwordConfirm = undefined; // Remove passwordConfirm after hashing
     next();
 });
 
