@@ -9,12 +9,20 @@ const hpp = require('hpp');
 const path = require("path");
 const AppError = require('./middleware/errorHandler');
 const globalErrorHandler = require('./controller/errorController');
+const cors = require('cors'); // Import the cors package
 
 
 const app = express();
 
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "twig");
+
+// Enable CORS
+app.use(cors({
+    origin: 'http://localhost:4200', // Allow Angular frontend
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
+    allowedHeaders: ['Content-Type', 'Authorization'] // Allowed headers
+}));
 
 // Security HTTP headers
 app.use(helmet());
