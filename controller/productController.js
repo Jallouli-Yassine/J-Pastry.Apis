@@ -1,31 +1,40 @@
 const Product = require('./../models/product.schema')
 const Category = require('./../models/Pcategorie.schema')
 const AppError = require('./../middleware/errorHandler');
+const multer = require('../middleware/multer-config');
+
 const {updateAllCarts} = require('../controller/utilityController'); // Adjust the path as necessary
 
 let e = new AppError('_', 0);
 // Add product route handler
+
 exports.addProduct = async (req, res, next) => {
     try {
-        const { name, description, pricePerUnit, unit,stock, imageUrl } = req.body;
-        const category=req.params.idCateg;
-        //console.log(category)
+        const { name, description, pricePerUnit, unit, stock } = req.body;
+        const category = req.params.idCateg;
+
         // Validate if category exists
         const categoryExists = await Category.findById(category);
         if (!categoryExists) {
-            e.message = 'Error getting category';
+            const e = new Error('Error getting category');
             e.statusCode = 404;
             return next(e);
         }
 
+        // Get the image URL from the uploaded file
+        let imageUrl = '';
+        if (req.file) {
+            imageUrl = req.file.path; // File path of the uploaded image
+        }
+
         const savedProduct = await Product.create({
-            name:name,
-            description:description,
-            pricePerUnit:pricePerUnit,
-            unit:unit,
-            category:categoryExists,
-            stock:stock,
-            imageUrl:imageUrl
+            name: name,
+            description: description,
+            pricePerUnit: pricePerUnit,
+            unit: unit,
+            category: categoryExists,
+            stock: stock,
+            imageUrl: imageUrl
         });
 
         res.status(201).json({
@@ -35,11 +44,11 @@ exports.addProduct = async (req, res, next) => {
             }
         });
     } catch (err) {
-        e.message = 'Error adding product';
+        const e = new Error('Error adding product');
         e.statusCode = 500;
         return next(e);
     }
-}
+};
 
 exports.getAllProducts = async (req, res, next) => {
     try {

@@ -17,6 +17,9 @@ const app = express();
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "twig");
 
+// Serve static files for image uploads
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Enable CORS
 app.use(cors({
     origin: 'http://localhost:4200', // Allow Angular frontend
