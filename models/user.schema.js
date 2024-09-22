@@ -22,6 +22,12 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: 'default.jpg',
     },
+
+    gender: {
+        type: String,
+        required: [true, 'A user must have a gender'],
+        enum: ['male', 'female']
+    },
     email: {
         type: String,
         required: [true, 'A user must have a email'],
@@ -50,14 +56,13 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'A user must have a role'],
         enum: {
-            values: ['user','agent','admin'],
+            values: ['user', 'agent', 'admin'],
             message: 'Role is either user, agent or admin',
         },
     },
     etat: {
         type: Boolean,
-        default: true,
-        select: false,
+        default: false,
     },
     TryLogin: {
         type: Number,

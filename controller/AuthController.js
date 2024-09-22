@@ -52,7 +52,8 @@ exports.signupUser = async (req, res, next) => {
             email: req.body.email,
             password: req.body.password,
             passwordConfirm: req.body.passwordConfirm,
-            role: 'user',
+            role: req.body.role,
+            gender: req.body.gender,
         });
 /*
         const url = `http://127.0.0.1:3000/api/v1/users/me`;

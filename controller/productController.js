@@ -1,15 +1,20 @@
 const Product = require('./../models/product.schema')
 const Category = require('./../models/Pcategorie.schema')
 const AppError = require('./../middleware/errorHandler');
-const multer = require('../middleware/multer-config');
+const fs = require('fs');
+const path = require('path');
 
 const {updateAllCarts} = require('../controller/utilityController'); // Adjust the path as necessary
 
 let e = new AppError('_', 0);
 // Add product route handler
 
+
 exports.addProduct = async (req, res, next) => {
+    console.log(req.file)
     try {
+        //console.log(req)
+        
         const { name, description, pricePerUnit, unit, stock } = req.body;
         const category = req.params.idCateg;
 
@@ -21,12 +26,7 @@ exports.addProduct = async (req, res, next) => {
             return next(e);
         }
 
-        // Get the image URL from the uploaded file
-        let imageUrl = '';
-        if (req.file) {
-            imageUrl = req.file.path; // File path of the uploaded image
-        }
-
+        // Create product with the new imageUrl
         const savedProduct = await Product.create({
             name: name,
             description: description,
@@ -34,8 +34,27 @@ exports.addProduct = async (req, res, next) => {
             unit: unit,
             category: categoryExists,
             stock: stock,
-            imageUrl: imageUrl
+            imageUrl: req.file ? req.file.filename : '' // Save the correct filename in the database
         });
+
+        
+
+        if (req.file) {
+            const newFilename = `${Date.now()}-${savedProduct._id}${path.extname(req.file.originalname)}`;
+            const oldPath = path.join(__dirname, '../uploads/', req.file.filename);
+            const newPath = path.join(__dirname, '../uploads/', newFilename);
+
+            // Rename the file
+            fs.rename(oldPath, newPath, (err) => {
+                if (err) throw err;
+                console.log('File renamed successfully');
+            });
+
+            // Update the project with the new filename
+            savedProduct.imageUrl = newFilename;
+            await savedProduct.save();
+        }
+
 
         res.status(201).json({
             status: 'success',
@@ -43,7 +62,9 @@ exports.addProduct = async (req, res, next) => {
                 product: savedProduct
             }
         });
+        
     } catch (err) {
+        console.error(err);
         const e = new Error('Error adding product');
         e.statusCode = 500;
         return next(e);

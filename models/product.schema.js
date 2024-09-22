@@ -11,7 +11,7 @@ const ProductSchema = new mongoose.Schema({
         required: true
     },
     quantity: { type: Number, required: false },
-    imageUrl: { type: String, required: true },
+    imageUrl: { type: String, required: false },
     createdAt: { type: Date, default: Date.now }
 });
 

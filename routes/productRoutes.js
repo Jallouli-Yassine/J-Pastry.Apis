@@ -8,7 +8,7 @@ router
     .route('/')
     .get(productController.getAllProducts);
 
-router.post('/:idCateg', multer.single('image'),productController.addProduct)
+router.post('/:idCateg', multer.single('imageUrl'),productController.addProduct)
 
 router
     .route('/:id')

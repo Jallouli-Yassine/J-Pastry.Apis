@@ -24,7 +24,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(cors({
     origin: 'http://localhost:4200', // Allow Angular frontend
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
-    allowedHeaders: ['Content-Type', 'Authorization'] // Allowed headers
+    allowedHeaders: ['Content-Type', 'Authorization', 'enctype', 'Accept'] // Allowed headers
 }));
 
 // Security HTTP headers
