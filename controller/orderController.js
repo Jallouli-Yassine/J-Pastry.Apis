@@ -153,3 +153,28 @@ exports.getOrdersByStatus = async (req, res, next) => {
         return next(e);
     }
 };
+
+
+exports.getUserOrders = async (req, res, next) => {
+    try {
+        const { userId } = req.params;
+
+        // Find all orders for the given userId
+        const orders = await Order.find({ user: userId }).populate('products.product packs.pack');
+
+        if (!orders || orders.length === 0) {
+            return next(new AppError('No orders found for this user', 404));
+        }
+
+        res.status(200).json({
+            status: 'success',
+            data: {
+                orders
+            }
+        });
+    } catch (err) {
+        console.error('Error fetching user orders:', err);
+        const e = new AppError('Error fetching user orders', 500);
+        return next(e);
+    }
+};
