@@ -20,12 +20,15 @@ app.set("view engine", "twig");
 // Serve static files for image uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Enable CORS
+// Enable CORS with PATCH allowed
 app.use(cors({
     origin: 'http://localhost:4200', // Allow Angular frontend
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], // Allowed HTTP methods
     allowedHeaders: ['Content-Type', 'Authorization', 'enctype', 'Accept'] // Allowed headers
-}));
+  }));
+  
+  // Handle preflight requests
+  app.options('*', cors()); // Preflight requests support
 
 // Security HTTP headers
 app.use(helmet());

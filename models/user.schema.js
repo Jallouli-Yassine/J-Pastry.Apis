@@ -80,6 +80,7 @@ const userSchema = new mongoose.Schema({
     },
     passwordChangedAt: Date,
     passwordResetToken: String,
+    passwordResetCode: String,
     passwordResetExpires: Date,
     blockedExpires: Date,
 });
@@ -92,6 +93,7 @@ userSchema.pre('save', async function (next) {
     this.passwordConfirm = undefined; // Remove passwordConfirm after hashing
     next();
 });
+
 
 userSchema.methods.correctPassword = async function (
     simplePassword,
